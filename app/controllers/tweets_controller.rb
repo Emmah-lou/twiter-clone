@@ -4,14 +4,15 @@ class TweetsController < ApplicationController
     render 'tweets/index'
   end
   def index_by_user
-    token = cookies.permanent.signed[:twitter_session_token]
-    session = Session.find_by(token: token)
-    if session && (user = User.find_by(username: params[:username]))
-      @tweets = user.tweets.all.order(id: :desc)
-      render 'feeds/index'
-    else
-      render json: { message: "User not found" }, status: :not_found
-    end
+    # token = cookies.permanent.signed[:twitter_session_token]
+    # session = Session.find_by(token: token)
+    user = User.find_by(username: params[:username])
+    @tweets = user.tweets.all.order(id: :desc)
+    render 'tweets/index'
+    #if session
+    #else
+     # render json: { message: 'test'}
+    #end
   end
   
   def create
