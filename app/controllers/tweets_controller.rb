@@ -6,12 +6,11 @@ class TweetsController < ApplicationController
   def index_by_user
     token = cookies.permanent.signed[:twitter_session_token]
     session = Session.find_by(token: token)
-    if session      
-      @tweets = session.user.tweets.all.order(id: :desc)
-      
+    if session && (user = User.find_by(username: params[:username]))
+      @tweets = user.tweets.all.order(id: :desc)
       render 'feeds/index'
     else
-      render json: {message: "User not found"}, status: :unprocessable_entity
+      render json: { message: "User not found" }, status: :not_found
     end
   end
   
@@ -33,11 +32,13 @@ class TweetsController < ApplicationController
   end
   
   def destroy
+    token = cookies.permanent.signed[:twitter_session_token]
+    session = Session.find_by(token: token)
     @tweet = Tweet.find_by(id: params[:id])
-    if @tweet&.destroy
+    if session and @tweet.destroy
       render json: {success: true}
     else
-      render json: {message: "Tweet not deleted"}, status: :unprocessable_entity
+      render json: {success: false}
     end
   end
 
