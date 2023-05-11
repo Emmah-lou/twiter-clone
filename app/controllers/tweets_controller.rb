@@ -1,13 +1,13 @@
 class TweetsController < ApplicationController
   def index
-    @tweets = Tweet.all
-    render 'feeds/index'
+    @tweets = Tweet.all.order(id: :desc)
+    render 'tweets/index'
   end
   def index_by_user
-    @session = get_session
-    if session
-      user = User.find_by(username: params[:username])
-      @tweets = user.tweets.all
+    token = cookies.permanent.signed[:twitter_session_token]
+    session = Session.find_by(token: token)
+    if session      
+      @tweets = session.user.tweets.all.order(id: :desc)
       
       render 'feeds/index'
     else
@@ -16,13 +16,14 @@ class TweetsController < ApplicationController
   end
   
   def create
-    @session = get_session
-    if @session
-      user = @session.user
+    token = cookies.permanent.signed[:twitter_session_token]
+    session = Session.find_by(token: token)
+    if session
+      user = session.user
       @tweet = user.tweets.new(tweet_params)
-      @tweet.user_id = user.id
+      # @tweet.user_id = user.id
       if @tweet.save 
-        render 'feeds/index'
+        render 'tweets/create'
       else
         render json: {message: "Tweet not created"}, status: :unprocessable_entity
       end
@@ -34,7 +35,7 @@ class TweetsController < ApplicationController
   def destroy
     @tweet = Tweet.find_by(id: params[:id])
     if @tweet&.destroy
-      render json: {message: "Tweet deleted"}
+      render json: {success: true}
     else
       render json: {message: "Tweet not deleted"}, status: :unprocessable_entity
     end

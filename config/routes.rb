@@ -4,7 +4,7 @@ Rails.application.routes.draw do
 
   # USERS
   post '/users' => 'users#create'
-  get 'users/:username/tweets' => 'tweets#index_by_user'
+  get 'users/:username/tweets' => 'users#index_by_user'
   # SESSIONS
   post '/sessions' => 'sessions#create'
   get '/authenticated' => 'sessions#authenticated'
